@@ -1,0 +1,76 @@
+; 2018-12-02
+;    ssh@192.168.1.1@root@22@.ttl
+;    telnet@192.168.1.1@root@23@.ttl
+;	ssl	22
+;	telnet	23
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ファイル名処理して変数に代入
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+strsplit param1 '@'
+protocol	=groupmatchstr1
+serverip	=groupmatchstr2
+port		=groupmatchstr3
+username	=groupmatchstr4
+
+getpassword 'password.dat' username password
+
+toupper protocol protocol
+LoginRequestKeyword	='login :'
+PasswdRequestKeyword	='passwd:'
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; sshの場合の処理
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+strcompare  'SSH'  protocol
+if result=0 then
+	; sprintf2 concmd '%s:%s /ssh /2 /auth=password /user=%s /passwd=%s ' serverip port username password
+	; sprintf2 concmd '%s:%s /ssh /2 /auth=password /user=%s /passwd=%s /keyfile=ssh_known_hosts' serverip port username password
+	sprintf2 concmd '%s:%s /ssh /2 /auth=password /user=%s /passwd=%s /keyfile=ssh_known_hosts /nosecuritywarning' serverip port username password
+
+	connect concmd
+	call logwrite
+endif
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; telnetの場合の処理
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+strcompare  'TELNET' protocol
+if result=0 then 
+	sprinf2 concmd '%s:23 /mossh /T=1 ' serverip
+	connect concmd
+	wait LoginRequestKeyword
+	sendln username
+	wait PasswdRequestKeyword
+	sendln password
+
+	call logwrite
+endif
+
+; getdir MacroDir
+; messagebox MacroDir MacroDir
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 終了
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 関数
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:logwrite
+	;getspecialfolder 
+
+	;"MyDocuments"
+	getenv 'USERNAME' username
+	getenv 'COMPUTERNAME' ComputerName
+	gettime timestr "&h_%Y%m%d-%H%M%S"
+	getspecialfolder LogFolder "MyDocuments"
+	
+	sprintf2 LogFilename '%s\teraterm_%s_%s.log' LogFolder ComputerName timestr
+	
+	;changedir LogFolder
+	logopen LogFilename 0 0 0 1
+return 
+
