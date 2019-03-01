@@ -1,5 +1,6 @@
 ; 2018-12-02
-;    ssh@192.168.1.1@root@22@.ttl
+;	2019-03-02
+;	ssh@yossym@192.168.3.4@22@version1@.ttl
 ;    telnet@192.168.1.1@root@23@.ttl
 ;	ssl	22
 ;	telnet	23
@@ -10,11 +11,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 strsplit param1 '@'
 protocol	=groupmatchstr1
-serverip	=groupmatchstr2
-port		=groupmatchstr3
-username	=groupmatchstr4
+username	=groupmatchstr2
+serverip	=groupmatchstr3
+port		=groupmatchstr4
+version		=groupmatchstr5
 
-getpassword 'password.dat' username password
+sprintf2 passwdfilename "%s@%s.dat" username version
+getpassword passwdfilename username password
 
 toupper protocol protocol
 LoginRequestKeyword	='login :'
