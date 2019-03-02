@@ -1,43 +1,30 @@
-
-strdim msg 100
+﻿strdim msg 100
 msg_index=0
 
-sendln ""
-wait '$'
-
-timeout=1
-
-; 同期モードに入る
-setsync 1
+;timeout=1
+mtimeout =10
 
 sendln 'ls -1'
-recvln
-
-result=1
-recvln
-
-strscan inputstr '$'
-
-while result=0
-
-	msg[msg_index]=inputstr
-	msg_index=msg_index+1
-
-;	sendln ""
+flushrecv
+; 同期モードに入る
+setsync 1
 	recvln
-	strscan inputstr '$'
 
-endwhile
-	sendln ""
+	result=1
+	while result=1
+		recvln
+		msg[msg_index]=inputstr
+		msg_index=msg_index+1
+	
+	endwhile
 
-
-; 非同期モードに入る
+; 非同期モード
 setsync 0
 
-
-listbox '好きな食べ物を選んでください' 'あなたへの問い' msg
+listbox 's' 't' msg
 
 goto END
 
 :END
+end
 
