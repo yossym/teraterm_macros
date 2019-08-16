@@ -10,18 +10,19 @@
 ;; ファイル名処理して変数に代入
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 strsplit param1 '@'
-protocol	=groupmatchstr1
-username	=groupmatchstr2
-serverip	=groupmatchstr3
-port		=groupmatchstr4
-version		=groupmatchstr5
+protocol = groupmatchstr1
+username = groupmatchstr2
+serverip = groupmatchstr3
+port     = groupmatchstr4
+version  = groupmatchstr5
 
 sprintf2 passwdfilename "%s@%s.dat" username version
 getpassword passwdfilename username password
 
 toupper protocol protocol
-LoginRequestKeyword	='login :'
-PasswdRequestKeyword	='passwd:'
+LoginRequestKeyword  = 'login :'
+PasswdRequestKeyword = 'passwd:'
+timeout=1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; sshの場合の処理
@@ -40,7 +41,7 @@ endif
 ;; telnetの場合の処理
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 strcompare  'TELNET' protocol
-if result=0 then 
+if result=0 then
 	sprinf2 concmd '%s:23 /mossh /T=1 ' serverip
 	connect concmd
 	wait LoginRequestKeyword
@@ -63,17 +64,20 @@ end
 ;; 関数
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :logwrite
-	;getspecialfolder 
 
-	;"MyDocuments"
-	getenv 'USERNAME' username
-	getenv 'COMPUTERNAME' ComputerName
-	gettime timestr "&h_%Y%m%d-%H%M%S"
-	getspecialfolder LogFolder "MyDocuments"
-	
-	sprintf2 LogFilename '%s\teraterm_%s_%s.log' LogFolder ComputerName timestr
-	
-	;changedir LogFolder
-	logopen LogFilename 0 0 0 1
-return 
+	if result = 2 then
+		;getspecialfolder
+
+		;"MyDocuments"
+		getenv 'USERNAME' username
+		getenv 'COMPUTERNAME' ComputerName
+		gettime timestr "&h_%Y%m%d-%H%M%S"
+		getspecialfolder LogFolder "MyDocuments"
+
+		sprintf2 LogFilename '%s\teraterm_%s_%s.log' LogFolder ComputerName timestr
+
+		;changedir LogFolder
+		logopen LogFilename 0 0 0 1
+	endif
+return
 
